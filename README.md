@@ -1,9 +1,14 @@
 # image processing from scratch
 
 
-All codes were wrote in python2.7
+All codes were wrote in python2.7 or c++
 
 moudles you may need:
-    numpy for matix calculation
-    matplotlib for reading and showing images
-    cv2 for some image operations
+    python:
+        numpy for matix calculation
+        matplotlib for reading and showing images
+        opencv2 for some image operations
+    c++:
+        opencv2
+
+Have fun.
