@@ -2,7 +2,6 @@
 #define IMAGEPROCESSINGFROMSCRATCH_RANSAC_H
 #include <opencv2/opencv.hpp>
 #include <vector>
-#endif //IMAGEPROCESSINGFROMSCRATCH_RANSAC_H
 
 /////////////////////////ransac///////////////////////////////////////////////////////
 template <class T>
@@ -382,3 +381,4 @@ std::vector<double> Ransac_sift(const std::vector<sift_pair> & Data, double p = 
 }
 
 
+#endif //IMAGEPROCESSINGFROMSCRATCH_RANSAC_H
