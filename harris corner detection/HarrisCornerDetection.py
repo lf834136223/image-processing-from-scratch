@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 import os
 import math
 
-def convlove(filter,mat,padding,strides):
+def convolve(filter,mat,padding,strides):
     '''
     :param filter:卷积核，必须为二维(2 x 1也算二维) 否则返回None
     :param mat:图片
@@ -49,7 +49,7 @@ def convlove(filter,mat,padding,strides):
 
     return result
 
-def linear_convlove(filter,mat,padding=None,strides=[1,1]):
+def linear_convolve(filter,mat,padding=None,strides=[1,1]):
     '''
     :param filter:线性卷积核
     :param mat:图片
@@ -67,13 +67,13 @@ def linear_convlove(filter,mat,padding=None,strides=[1,1]):
             elif filter_size[0] == 1:
                 padding = [filter_size[1]/2,filter_size[1]/2]
         if filter_size[0] == 1:
-            result = convlove(filter,mat,[0,0,padding[0],padding[1]],strides)
+            result = convolve(filter,mat,[0,0,padding[0],padding[1]],strides)
         elif filter_size[1] == 1:
-            result = convlove(filter, mat, [padding[0],padding[1],0,0], strides)
+            result = convolve(filter, mat, [padding[0],padding[1],0,0], strides)
 
     return result
 
-def _2_dim_divided_convlove(filter,mat):
+def _2_dim_divided_convolve(filter,mat):
     '''
 
     :param filter: 线性卷积核,必须为二维(2 x 1也算二维) 否则返回None
@@ -82,8 +82,8 @@ def _2_dim_divided_convlove(filter,mat):
     '''
     result = None
     if 1 in filter.shape:
-        result = linear_convlove(filter,mat)
-        result = linear_convlove(filter.T,result)
+        result = linear_convolve(filter,mat)
+        result = linear_convolve(filter.T,result)
 
     return result
 
@@ -189,20 +189,20 @@ if __name__ == '__main__':
 
             img = orignal_img.mean(axis=-1)
 
-            img_gx = convlove(G_x,img,[2,2,2,2],[1,1])
-            img_gy = convlove(G_y,img,[2,2,2,2],[1,1])
+            img_gx = convolve(G_x,img,[2,2,2,2],[1,1])
+            img_gy = convolve(G_y,img,[2,2,2,2],[1,1])
 
             sq_img_gx = img_gx * img_gx
             sq_img_gy = img_gy * img_gy
             img_gx_gy = img_gx * img_gy
 
-            # sq_img_gx = convlove(window, sq_img_gx, [2, 2, 2, 2], [1, 1])
-            # sq_img_gy = convlove(window, sq_img_gy, [2, 2, 2, 2], [1, 1])
-            # img_gx_gy = convlove(window, img_gx_gy, [2, 2, 2, 2], [1, 1])
+            # sq_img_gx = convolve(window, sq_img_gx, [2, 2, 2, 2], [1, 1])
+            # sq_img_gy = convolve(window, sq_img_gy, [2, 2, 2, 2], [1, 1])
+            # img_gx_gy = convolve(window, img_gx_gy, [2, 2, 2, 2], [1, 1])
 
-            sq_img_gx = _2_dim_divided_convlove(linear_Gaussian_filter_5,sq_img_gx)
-            sq_img_gy = _2_dim_divided_convlove(linear_Gaussian_filter_5,sq_img_gy)
-            img_gx_gy = _2_dim_divided_convlove(linear_Gaussian_filter_5,img_gx_gy)
+            sq_img_gx = _2_dim_divided_convolve(linear_Gaussian_filter_5,sq_img_gx)
+            sq_img_gy = _2_dim_divided_convolve(linear_Gaussian_filter_5,sq_img_gy)
+            img_gx_gy = _2_dim_divided_convolve(linear_Gaussian_filter_5,img_gx_gy)
 
             score = score_for_each_pixel(sq_img_gx,sq_img_gy,img_gx_gy,0.05)
             final_img = Sign(orignal_img,score,[12,12])

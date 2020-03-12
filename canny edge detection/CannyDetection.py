@@ -5,7 +5,7 @@ import os
 import math
 import cv2
 
-def convlove(filter,mat,padding,strides):
+def convolve(filter,mat,padding,strides):
     '''
     :param filter:卷积核，必须为二维(2 x 1也算二维) 否则返回None
     :param mat:图片
@@ -49,7 +49,7 @@ def convlove(filter,mat,padding,strides):
 
     return result
 
-def linear_convlove(filter,mat,padding=None,strides=[1,1]):
+def linear_convolve(filter,mat,padding=None,strides=[1,1]):
     '''
     :param filter:线性卷积核
     :param mat:图片
@@ -67,13 +67,13 @@ def linear_convlove(filter,mat,padding=None,strides=[1,1]):
             elif filter_size[0] == 1:
                 padding = [filter_size[1]/2,filter_size[1]/2]
         if filter_size[0] == 1:
-            result = convlove(filter,mat,[0,0,padding[0],padding[1]],strides)
+            result = convolve(filter,mat,[0,0,padding[0],padding[1]],strides)
         elif filter_size[1] == 1:
-            result = convlove(filter, mat, [padding[0],padding[1],0,0], strides)
+            result = convolve(filter, mat, [padding[0],padding[1],0,0], strides)
 
     return result
 
-def _2_dim_divided_convlove(filter,mat):
+def _2_dim_divided_convolve(filter,mat):
     '''
 
     :param filter: 线性卷积核,必须为二维(2 x 1也算二维) 否则返回None
@@ -82,8 +82,8 @@ def _2_dim_divided_convlove(filter,mat):
     '''
     result = None
     if 1 in filter.shape:
-        result = linear_convlove(filter,mat)
-        result = linear_convlove(filter.T,result)
+        result = linear_convolve(filter,mat)
+        result = linear_convolve(filter.T,result)
 
     return result
 
@@ -204,15 +204,15 @@ if __name__ == '__main__':
 
 
 
-            img2 = _2_dim_divided_convlove(linear_Gaussian_filter,img)
-            # img2 = convlove(Gaussian_filter_5, img, [2, 2, 2, 2], [1, 1])
+            img2 = _2_dim_divided_convolve(linear_Gaussian_filter,img)
+            # img2 = convolve(Gaussian_filter_5, img, [2, 2, 2, 2], [1, 1])
 
             plt.imshow(img2.astype(np.uint8), cmap='gray')
             plt.axis('off')
             plt.show()
 
-            img3 = convlove(sobel_kernel_x,img2,[1,1,1,1],[1,1])
-            img4 = convlove(sobel_kernel_y,img2,[1,1,1,1],[1,1])
+            img3 = convolve(sobel_kernel_x,img2,[1,1,1,1],[1,1])
+            img4 = convolve(sobel_kernel_y,img2,[1,1,1,1],[1,1])
 
             gradiant_length = (img3**2+img4**2)**(1.0/2)
 

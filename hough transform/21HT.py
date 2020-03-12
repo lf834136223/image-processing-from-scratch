@@ -6,7 +6,7 @@ import os
 import cv2
 
 
-def convlove(filter,mat,padding,strides):
+def convolve(filter,mat,padding,strides):
     '''
     :param filter:卷积核，必须为二维(2 x 1也算二维) 否则返回None
     :param mat:图片
@@ -75,8 +75,8 @@ def AHTforCircles(edge,center_threhold_factor = None,score_threhold = None,min_c
 
     sobel_kernel_y = np.array([[-1.0, -2.0, -1.0], [0.0, 0.0, 0.0], [1.0, 2.0, 1.0]])
     sobel_kernel_x = np.array([[-1.0, 0.0, 1.0], [-2.0, 0.0, 2.0], [-1.0, 0.0, 1.0]])
-    edge_x = convlove(sobel_kernel_x,edge,[1,1,1,1],[1,1])
-    edge_y = convlove(sobel_kernel_y,edge,[1,1,1,1],[1,1])
+    edge_x = convolve(sobel_kernel_x,edge,[1,1,1,1],[1,1])
+    edge_y = convolve(sobel_kernel_y,edge,[1,1,1,1],[1,1])
 
 
     center_accumulator = np.zeros((int(np.ceil(center_axis_scale*edge.shape[0])),int(np.ceil(center_axis_scale*edge.shape[1]))))

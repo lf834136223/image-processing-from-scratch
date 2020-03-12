@@ -11,7 +11,7 @@ from scipy.misc import imresize
 
 
 
-def convlove(filter,mat,padding,strides):
+def convolve(filter,mat,padding,strides):
 
     result = None
     filter_size = filter.shape
@@ -94,7 +94,7 @@ def getDoG(img,n,sigma0,S = None,O = None):
             dim = int(6*sigma[i][j] + 1)
             if dim % 2 == 0:
                 dim += 1
-            GuassianPyramid[-1].append(convlove(GuassianKernel(sigma[i][j], dim),samplePyramid[i],[dim/2,dim/2,dim/2,dim/2],[1,1]))
+            GuassianPyramid[-1].append(convolve(GuassianKernel(sigma[i][j], dim),samplePyramid[i],[dim/2,dim/2,dim/2,dim/2],[1,1]))
     DoG = [[GuassianPyramid[o][s+1] - GuassianPyramid[o][s] for s in range(S - 1)] for o in range(O)]
 
 
