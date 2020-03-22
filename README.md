@@ -1,7 +1,7 @@
 # image processing from scratch
 
 
-All codes were wrote in python2.7 or c++
+All codes were wrote in python3.7 or c++
 
 moudles you may need:
     python:
