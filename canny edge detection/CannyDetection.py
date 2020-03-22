@@ -63,9 +63,9 @@ def linear_convolve(filter,mat,padding=None,strides=[1,1]):
     if len(filter_size) == 2 and 1 in filter_size:
         if padding == None or len(padding) < 2:
             if filter_size[1] == 1:
-                padding = [filter_size[0]/2,filter_size[0]/2]
+                padding = [filter_size[0]//2,filter_size[0]//2]
             elif filter_size[0] == 1:
-                padding = [filter_size[1]/2,filter_size[1]/2]
+                padding = [filter_size[1]//2,filter_size[1]//2]
         if filter_size[0] == 1:
             result = convolve(filter,mat,[0,0,padding[0],padding[1]],strides)
         elif filter_size[1] == 1:
@@ -197,7 +197,7 @@ if __name__ == '__main__':
             dim = int(np.round(6*sigma+1))
             if dim % 2 == 0:
                 dim += 1
-            linear_Gaussian_filter = [np.abs(t - (dim/2)) for t in range(dim)]
+            linear_Gaussian_filter = [np.abs(t - (dim//2)) for t in range(dim)]
 
             linear_Gaussian_filter = np.array([[OneDimensionStandardNormalDistribution(t,sigma) for t in linear_Gaussian_filter]])
             linear_Gaussian_filter = linear_Gaussian_filter/linear_Gaussian_filter.sum()

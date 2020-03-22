@@ -4,9 +4,7 @@ warnings.filterwarnings("ignore")  #忽略警告
 import numpy as np
 import matplotlib.pyplot as plt
 from sklearn.neighbors import KNeighborsClassifier
-import os
-import math
-from scipy.misc import imresize
+from PIL import Image
 
 
 
@@ -59,7 +57,7 @@ def GuassianKernel(sigma , dim):
     :param dim: dimension(must be positive and also an odd number)
     :return: return the required Gaussian kernel.
     '''
-    temp = [t - (dim/2) for t in range(dim)]
+    temp = [t - (dim//2) for t in range(dim)]
     assistant = []
     for i in range(dim):
         assistant.append(temp)
@@ -94,7 +92,7 @@ def getDoG(img,n,sigma0,S = None,O = None):
             dim = int(6*sigma[i][j] + 1)
             if dim % 2 == 0:
                 dim += 1
-            GuassianPyramid[-1].append(convolve(GuassianKernel(sigma[i][j], dim),samplePyramid[i],[dim/2,dim/2,dim/2,dim/2],[1,1]))
+            GuassianPyramid[-1].append(convolve(GuassianKernel(sigma[i][j], dim),samplePyramid[i],[dim//2,dim//2,dim//2,dim//2],[1,1]))
     DoG = [[GuassianPyramid[o][s+1] - GuassianPyramid[o][s] for s in range(S - 1)] for o in range(O)]
 
 
@@ -332,8 +330,8 @@ def calcSIFTDescriptor(img,ptf,ori,scl,d,n,SIFT_DESCR_SCL_FCTR = 3.0,SIFT_DESCR_
 
             c_rot = j * cos_t - i * sin_t
             r_rot = j * sin_t + i * cos_t
-            rbin = r_rot + d / 2 - 0.5
-            cbin = c_rot + d / 2 - 0.5
+            rbin = r_rot + d // 2 - 0.5
+            cbin = c_rot + d // 2 - 0.5
             r = pt[1] + i
             c = pt[0] + j
 
@@ -494,7 +492,7 @@ def Lines(img,info,color = (255,0,0),err = 700):
             if (temp*(t >= 0)*(t <= 1)).any():
                 result[i,j] = color
                 k+=1
-    print k
+    print(k)
 
     return result
 
@@ -520,7 +518,7 @@ def drawLines(X1,X2,Y1,Y2,dis,img,num = 10):
 
 
 if __name__ == '__main__':
-    origimg = plt.imread('./SIFTimg/1.jpeg')
+    origimg = plt.imread('./SIFTimg/3.jpeg')
     if len(origimg.shape) ==  3:
         img = origimg.mean(axis=-1)
     else:
@@ -528,13 +526,14 @@ if __name__ == '__main__':
     keyPoints,discriptors = SIFT(img)
 
 
-    origimg2 = plt.imread('./SIFTimg/2.jpeg')
+    origimg2 = plt.imread('./SIFTimg/4.jpeg')
     if len(origimg.shape) == 3:
         img2 = origimg2.mean(axis=-1)
     else:
         img2 = origimg2
     ScaleRatio = img.shape[0]*1.0/img2.shape[0]
-    img2 = imresize(img2,(img.shape[0],int(round(ScaleRatio*img2.shape[1]))))
+
+    img2 = np.array(Image.fromarray(img2).resize((int(round(ScaleRatio * img2.shape[1])),img.shape[0]), Image.BICUBIC))
     keyPoints2, discriptors2 = SIFT(img2,True)
 
     knn = KNeighborsClassifier(n_neighbors=1)
@@ -546,8 +545,9 @@ if __name__ == '__main__':
 
     keyPoints2[:, 1] = img.shape[1] + keyPoints2[:, 1]
 
-    origimg2 = imresize(origimg2,img2.shape)
+    origimg2 = np.array(Image.fromarray(origimg2).resize((img2.shape[1],img2.shape[0]), Image.BICUBIC))
     result = np.hstack((origimg,origimg2))
+
 
     keyPoints = keyPoints[match[1][:,0]]
 

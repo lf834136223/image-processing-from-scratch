@@ -30,16 +30,16 @@ def rawFFT(Img, Wr,axis):
 def FFT_1d(Img,axis):
     Wr = np.zeros(Img.shape,dtype=complex)
     if axis == 0:
-        Wr = np.zeros((Img.shape[0]/2,Img.shape[1]), dtype=complex)
+        Wr = np.zeros((Img.shape[0]//2,Img.shape[1]), dtype=complex)
         temp = np.array([
-            np.cos(2*np.pi*i/Img.shape[0]) - 1j*np.sin(2*np.pi*i/Img.shape[0]) for i in range(Img.shape[0]/2)])
+            np.cos(2*np.pi*i/Img.shape[0]) - 1j*np.sin(2*np.pi*i/Img.shape[0]) for i in range(Img.shape[0]//2)])
         for i in range(Wr.shape[1]):
             Wr[:,i] = temp
     elif axis == 1:
-        Wr = np.zeros((Img.shape[0], Img.shape[1]/2), dtype=complex)
+        Wr = np.zeros((Img.shape[0], Img.shape[1]//2), dtype=complex)
         temp = np.array([
             np.cos(2 * np.pi * i / Img.shape[1]) - 1j * np.sin(2 * np.pi * i / Img.shape[1]) for i in
-            range(Img.shape[1] / 2)])
+            range(Img.shape[1] // 2)])
         for i in range(Wr.shape[0]):
             Wr[i,:] = temp
     return rawFFT(Img, Wr,axis)
@@ -47,16 +47,16 @@ def FFT_1d(Img,axis):
 def iFFT_1d(Img,axis):
     Wr = np.zeros(Img.shape,dtype=complex)
     if axis == 0:
-        Wr = np.zeros((Img.shape[0]/2,Img.shape[1]), dtype=complex)
+        Wr = np.zeros((Img.shape[0]//2,Img.shape[1]), dtype=complex)
         temp = np.array([
-            np.cos(2*np.pi*i/Img.shape[0]) + 1j*np.sin(2*np.pi*i/Img.shape[0]) for i in range(Img.shape[0]/2)])
+            np.cos(2*np.pi*i/Img.shape[0]) + 1j*np.sin(2*np.pi*i/Img.shape[0]) for i in range(Img.shape[0]//2)])
         for i in range(Wr.shape[1]):
             Wr[:,i] = temp
     elif axis == 1:
-        Wr = np.zeros((Img.shape[0], Img.shape[1]/2), dtype=complex)
+        Wr = np.zeros((Img.shape[0], Img.shape[1]//2), dtype=complex)
         temp = np.array([
             np.cos(2 * np.pi * i / Img.shape[1]) + 1j * np.sin(2 * np.pi * i / Img.shape[1]) for i in
-            range(Img.shape[1] / 2)])
+            range(Img.shape[1] // 2)])
         for i in range(Wr.shape[0]):
             Wr[i,:] = temp
 
@@ -82,10 +82,10 @@ def FFT_2d(Img):
             N = N << 1
         num2 = N - imgsize[1]
 
-        pic = FFT_1d(np.pad(Img, ((num1 / 2, num1 - num1 / 2), (0, 0)), 'edge'), 0)[
-              num1 / 2:num1 / 2 + imgsize[0], :]
-        pic = FFT_1d(np.pad(pic, ((0, 0), (num2 / 2, num2 - num2 / 2)), 'edge'), 1)[:,
-              num2 / 2:num2 / 2 + imgsize[1]]
+        pic = FFT_1d(np.pad(Img, ((num1 // 2, num1 - num1 // 2), (0, 0)), 'edge'), 0)[
+              num1 // 2:num1 // 2 + imgsize[0], :]
+        pic = FFT_1d(np.pad(pic, ((0, 0), (num2 // 2, num2 - num2 // 2)), 'edge'), 1)[:,
+              num2 // 2:num2 // 2 + imgsize[1]]
 
     return pic
 
@@ -109,8 +109,8 @@ def iFFT_2d(Img):
             N = N << 1
         num2 = N - imgsize[1]
 
-        pic = iFFT_1d(np.pad(Img,((num1/2,num1-num1/2),(0,0)),'edge'),0)[num1/2:num1/2+imgsize[0],:]  # ,constant_values=(255,255)
-        pic = iFFT_1d(np.pad(pic,((0,0),(num2/2,num2-num2/2)),'edge'),1)[:,num2/2:num2/2+imgsize[1]]  # ,constant_values=(255,255)
+        pic = iFFT_1d(np.pad(Img,((num1//2,num1-num1//2),(0,0)),'edge'),0)[num1//2:num1//2+imgsize[0],:]  # ,constant_values=(255,255)
+        pic = iFFT_1d(np.pad(pic,((0,0),(num2//2,num2-num2//2)),'edge'),1)[:,num2//2:num2//2+imgsize[1]]  # ,constant_values=(255,255)
 
     return pic
 

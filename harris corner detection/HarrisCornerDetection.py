@@ -63,9 +63,9 @@ def linear_convolve(filter,mat,padding=None,strides=[1,1]):
     if len(filter_size) == 2 and 1 in filter_size:
         if padding == None or len(padding) < 2:
             if filter_size[1] == 1:
-                padding = [filter_size[0]/2,filter_size[0]/2]
+                padding = [filter_size[0]//2,filter_size[0]//2]
             elif filter_size[0] == 1:
-                padding = [filter_size[1]/2,filter_size[1]/2]
+                padding = [filter_size[1]//2,filter_size[1]//2]
         if filter_size[0] == 1:
             result = convolve(filter,mat,[0,0,padding[0],padding[1]],strides)
         elif filter_size[1] == 1:
@@ -126,16 +126,16 @@ def Sign(img,score,area,decide_value=None,boder=[3,3,3,3]):
     final_img = img.copy()
     for i in range(img.shape[0]):
         for j in range(img.shape[1]):
-            isLocalExtreme = score[i,j] >= score[max(i-(area[0]/2),0):min(i+(area[0]/2)+1,img.shape[0]),max(j-(area[1]/2),0):min(j+(area[1]/2)+1,img.shape[1])] #非极值抑制
+            isLocalExtreme = score[i,j] >= score[max(i-(area[0]//2),0):min(i+(area[0]//2)+1,img.shape[0]),max(j-(area[1]//2),0):min(j+(area[1]//2)+1,img.shape[1])] #非极值抑制
             if judger[i,j] and isLocalExtreme.all():
-                for k in range(min(boder[0],area[1]/6+1)):
-                    final_img[max(i-(area[0]/2),0):min(i+(area[0]/2)+1,img.shape[0]),max(j-(area[1]/2),0)+k,:] = [255,0,0] #top
-                for k in range(min(boder[1],area[1]/6+1)):
-                    final_img[max(i-(area[0]/2),0):min(i+(area[0]/2)+1,img.shape[0]),min(j+(area[1]/2),img.shape[1]-1)-k,:] = [255,0,0] #bottom
-                for k in range(min(boder[2],area[0]/6+1)):
-                    final_img[max(i-(area[0]/2),0)+k,max(j-(area[1]/2),0):min(j+(area[1]/2)+1,img.shape[1]),:] = [255, 0, 0] #left
-                for k in range(min(boder[3],area[0]/6+1)):
-                    final_img[min(i+(area[0]/2),img.shape[0]-1)-k,max(j-(area[1]/2),0):min(j+(area[1]/2)+1,img.shape[1]),:] = [255,0,0]  # right
+                for k in range(min(boder[0],area[1]//6+1)):
+                    final_img[max(i-(area[0]//2),0):min(i+(area[0]//2)+1,img.shape[0]),max(j-(area[1]//2),0)+k,:] = [255,0,0] #top
+                for k in range(min(boder[1],area[1]//6+1)):
+                    final_img[max(i-(area[0]//2),0):min(i+(area[0]//2)+1,img.shape[0]),min(j+(area[1]//2),img.shape[1]-1)-k,:] = [255,0,0] #bottom
+                for k in range(min(boder[2],area[0]//6+1)):
+                    final_img[max(i-(area[0]//2),0)+k,max(j-(area[1]//2),0):min(j+(area[1]//2)+1,img.shape[1]),:] = [255, 0, 0] #left
+                for k in range(min(boder[3],area[0]//6+1)):
+                    final_img[min(i+(area[0]//2),img.shape[0]-1)-k,max(j-(area[1]//2),0):min(j+(area[1]//2)+1,img.shape[1]),:] = [255,0,0]  # right
     return final_img
 
 def OneDimensionStandardNormalDistribution(x,sigma):
