@@ -1,3 +1,7 @@
+//
+// author: 会飞的吴克
+//
+
 #ifndef IMAGEPROCESSINGFROMSCRATCH_SVD_H
 #define IMAGEPROCESSINGFROMSCRATCH_SVD_H
 namespace EigenValue{

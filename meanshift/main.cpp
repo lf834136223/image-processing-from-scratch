@@ -1,3 +1,7 @@
+//
+// author: 会飞的吴克
+//
+
 #include <opencv2/opencv.hpp>
 #include "meanshift.h"
 

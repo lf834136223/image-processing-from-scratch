@@ -1,3 +1,7 @@
+//
+// author: 会飞的吴克
+//
+
 #include <iostream>
 #include <opencv2/opencv.hpp>
 #include "PCA.h"

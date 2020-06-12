@@ -1,3 +1,7 @@
+//
+// author: 会飞的吴克
+//
+
 #include <iostream>
 #include "ransac.h"
 #include <opencv2/xfeatures2d.hpp>

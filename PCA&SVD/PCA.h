@@ -1,3 +1,7 @@
+//
+// author: 会飞的吴克
+//
+
 #ifndef IMAGEPROCESSINGFROMSCRATCH_PCA_H
 #define IMAGEPROCESSINGFROMSCRATCH_PCA_H
 namespace EigenValue{

@@ -1,3 +1,7 @@
+//
+// author: 会飞的吴克
+//
+
 #ifndef IMAGEPROCESSINGFROMSCRATCH_MEANSHIFT_H
 #define IMAGEPROCESSINGFROMSCRATCH_MEANSHIFT_H
 #include <iostream>

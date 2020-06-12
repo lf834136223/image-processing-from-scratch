@@ -1,3 +1,7 @@
+//
+// author: 会飞的吴克
+//
+
 #ifndef IMAGEPROCESSINGFROMSCRATCH_RANSAC_H
 #define IMAGEPROCESSINGFROMSCRATCH_RANSAC_H
 #include <opencv2/opencv.hpp>
