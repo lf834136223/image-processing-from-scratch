@@ -1,3 +1,8 @@
+//
+// author: 会飞的吴克
+//
+
+
 #ifndef IMAGEPROCESSINGFROMSCRATCH_KNN_H
 #define IMAGEPROCESSINGFROMSCRATCH_KNN_H
 #include <iostream>

@@ -1,5 +1,8 @@
 #ifndef IMAGEPROCESSINGFROMSCRATCH_MEANSHIFT_H
 #define IMAGEPROCESSINGFROMSCRATCH_MEANSHIFT_H
+#include <iostream>
+#include <vector>
+
 namespace Segmentation{
 
     const double PI  = 3.14159265358979323846264338327950288;
