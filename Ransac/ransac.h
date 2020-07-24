@@ -228,8 +228,9 @@ std::vector<double> Ransac_line(const std::vector<point2D> & Data, bool show = f
         }
     }
 
-    do{
-        inners = cur_inners;
+    /* optimizer */
+    if(!cur_inners.empty())
+    {
         cur_model = LSQ(cur_inners,Data);
         cur_inners = lineCalcInners(Data,cur_model,tolerance);
 
@@ -257,7 +258,6 @@ std::vector<double> Ransac_line(const std::vector<point2D> & Data, bool show = f
             cv::waitKey(500);
         }
     }
-    while(!(inners == cur_inners));
 
     return cur_model;
 }
@@ -302,27 +302,23 @@ std::vector<double> siftBuildingFunc (std::vector<unsigned long> & inners,
                                       const std::vector<sift_pair> & Data,const std::vector<unsigned long> & sample,const double & err)
 {
     std::vector<double> model;
-    cv::Mat A, A_pinv;
-    cv::Mat b;
+    cv::Mat A;
     for(unsigned long i = 0;i < sample.size();i++)
     {
-        cv::Mat temp = (cv::Mat_<double >(2,8) <<
-                Data[sample[i]].x1,Data[sample[i]].y1,1,0,0,0,-Data[sample[i]].x1*Data[sample[i]].x2,-Data[sample[i]].x2*Data[sample[i]].y1,
-                0,0,0,Data[sample[i]].x1,Data[sample[i]].y1,1,-Data[sample[i]].x1*Data[sample[i]].y2,-Data[sample[i]].y1*Data[sample[i]].y2);
+        cv::Mat temp = (cv::Mat_<double >(2,9) <<
+                Data[sample[i]].x1,Data[sample[i]].y1,1,0,0,0,-Data[sample[i]].x1*Data[sample[i]].x2,-Data[sample[i]].x2*Data[sample[i]].y1,-Data[sample[i]].x2,
+                0,0,0,Data[sample[i]].x1,Data[sample[i]].y1,1,-Data[sample[i]].x1*Data[sample[i]].y2,-Data[sample[i]].y1*Data[sample[i]].y2,-Data[sample[i]].y2);
         A.push_back(temp);
-        b.push_back(Data[sample[i]].x2);
-        b.push_back(Data[sample[i]].y2);
     }
 
-//    std::cout<< A.size << std::endl;
-//    std::cout<< b.size << std::endl;
-//    std::cout<< A << std::endl;
+    cv::Mat W,U,Vt;
+    cv::SVDecomp(A,W,U,Vt);
+    int Rows = Vt.rows;
+    double ratio = 1/Vt.at<double >(Rows-1,8);
 
-    cv::invert(A,A_pinv,cv::DECOMP_SVD);
-    cv::Mat M = A_pinv * b;
     for(unsigned long i = 0;i < 8;i++)
     {
-        model.push_back(M.at<double >(i));
+        model.push_back(Vt.at<double >(Rows-1,i)*ratio);
     }
 
     inners = siftCalcInners(Data,model,err);
@@ -332,34 +328,31 @@ std::vector<double> siftBuildingFunc (std::vector<unsigned long> & inners,
 std::vector<double> siftModelOptimizer(const std::vector<unsigned long> & inners,const std::vector<sift_pair> & Data)
 {
     std::vector<double> model;
-    cv::Mat A, A_pinv;
-    cv::Mat b;
+    cv::Mat A;
     for(unsigned long i = 0;i < inners.size();i++)
     {
-        cv::Mat temp = (cv::Mat_<double >(2,8) <<
-                Data[inners[i]].x1,Data[inners[i]].y1,1,0,0,0,-Data[inners[i]].x1*Data[inners[i]].x2,-Data[inners[i]].x2*Data[inners[i]].y1,
-                0,0,0,Data[inners[i]].x1,Data[inners[i]].y1,1,-Data[inners[i]].x1*Data[inners[i]].y2,-Data[inners[i]].y1*Data[inners[i]].y2);
+        cv::Mat temp = (cv::Mat_<double >(2,9) <<
+                Data[inners[i]].x1,Data[inners[i]].y1,1,0,0,0,-Data[inners[i]].x1*Data[inners[i]].x2,-Data[inners[i]].x2*Data[inners[i]].y1,-Data[inners[i]].x2,
+                0,0,0,Data[inners[i]].x1,Data[inners[i]].y1,1,-Data[inners[i]].x1*Data[inners[i]].y2,-Data[inners[i]].y1*Data[inners[i]].y2,-Data[inners[i]].y2);
         A.push_back(temp);
-        b.push_back(Data[inners[i]].x2);
-        b.push_back(Data[inners[i]].y2);
-    }
-    cv::invert(A,A_pinv,cv::DECOMP_SVD);
-    cv::Mat M = A_pinv * b;
-    for(unsigned long i = 0;i < 8;i++)
-    {
-        model.push_back(M.at<double >(i));
     }
 
-//    std::cout<< A << std::endl;
-//    std::cout<< M << std::endl;
-//    std::cout<< Data.size() <<" "<< inners.size() << std::endl;
+    cv::Mat W,U,Vt;
+    cv::SVDecomp(A,W,U,Vt);
+    int Rows = Vt.rows;
+    double ratio = 1/Vt.at<double >(Rows-1,8);
+
+    for(unsigned long i = 0;i < 8;i++)
+    {
+        model.push_back(Vt.at<double >(Rows-1,i)*ratio);
+    }
 
     return model;
 }
 
 
 std::vector<double> Ransac_sift(const std::vector<sift_pair> & Data, double p = 1.0/6, double P = 0.95,
-                                const double & tolerance = 1, const unsigned long & sample_num = 4)
+                                const double & tolerance = 3, const unsigned long & sample_num = 4)
 {
     srand((unsigned)time(NULL));
     assert(Data.size() >= sample_num);
@@ -373,13 +366,12 @@ std::vector<double> Ransac_sift(const std::vector<sift_pair> & Data, double p = 
         cur_model = ransac<sift_pair>(cur_inners,Data,siftSample,siftBuildingFunc,cur_model,cur_inners,tolerance);
     }
 
-    do
-    {
-        inners = cur_inners;
-        cur_model = siftModelOptimizer(cur_inners,Data);
-        cur_inners = siftCalcInners(Data,cur_model,tolerance);
-    }
-    while(!(inners == cur_inners));
+    /* optimizer */
+//    if(!cur_inners.empty())
+//    {
+//        cur_model = siftModelOptimizer(cur_inners,Data);
+//        cur_inners = siftCalcInners(Data,cur_model,tolerance);
+//    }
 
     return cur_model;
 }

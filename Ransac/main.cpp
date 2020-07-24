@@ -44,11 +44,24 @@ void test_Ransac_sift()
 
     cv::FlannBasedMatcher matcher;
     std::vector<cv::DMatch> matchPairs;
+    std::vector<cv::DMatch> matchPairs2;
+
     matcher.match(descriptor1,descriptor2,matchPairs);      // 特征点匹配
+    matcher.match(descriptor2,descriptor1,matchPairs2);
+    int temp;
+    for(unsigned long i = 0;i < matchPairs2.size();i++)
+    {
+        temp = matchPairs2[i].queryIdx;
+        matchPairs2[i].queryIdx = matchPairs2[i].trainIdx;
+        matchPairs2[i].trainIdx = temp;
+    }
+    matchPairs.insert(matchPairs.end(),matchPairs2.begin(),matchPairs2.end());
 
     std::sort(matchPairs.begin(),matchPairs.end());
     std::vector<cv::Point2f> goodkpts1, goodkpts2;
-    for(unsigned long i = 0;i < matchPairs.size()*0.5;i++)
+    std::cout << "pairs: " << matchPairs.size() << std::endl;
+    unsigned long num = matchPairs.size()*0.05 > 60 ? matchPairs.size()*0.05 : 60;
+    for(unsigned long i = 0;i < num;i++)
     {
         goodkpts1.push_back(kpt1[matchPairs[i].queryIdx].pt);
         goodkpts2.push_back(kpt2[matchPairs[i].trainIdx].pt);
@@ -62,7 +75,7 @@ void test_Ransac_sift()
     {
         Data.push_back({goodkpts1[i].x,goodkpts1[i].y,goodkpts2[i].x,goodkpts2[i].y});
     }
-    std::vector<double> model = Ransac_sift(Data,1.0/6);
+    std::vector<double> model = Ransac_sift(Data,1.0/10);
     model.push_back(1);
     cv::Mat transform(model);
     transform = transform.reshape(0,3);
@@ -176,7 +189,7 @@ void test_Ransac_sift()
 }
 
 int main() {
-    // test_Ransac_line();
-    test_Ransac_sift();
+    test_Ransac_line();
+    // test_Ransac_sift();
     return 0;
 }
