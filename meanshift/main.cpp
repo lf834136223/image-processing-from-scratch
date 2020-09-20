@@ -7,7 +7,7 @@
 
 void test_meanshift()
 {
-    auto BGRimg = cv::imread("./meanshift/1.jpg"); // read image.
+    auto BGRimg = cv::imread("./meanshift/3.png"); // read image.
     cv::imshow("display",BGRimg);
     cv::waitKey(0);
 
@@ -27,7 +27,8 @@ void test_meanshift()
     Segmentation::RGBimage2LUVimage(imgRGB,imgLUV);   // convert from RGB color space to LUV color space.
 
     Segmentation::Image meanshift_imgLUV;
-    Segmentation::meanshift(imgLUV,meanshift_imgLUV); // meanshift
+    //Segmentation::meanshift_filter(imgLUV,meanshift_imgLUV); // meanshift
+    Segmentation::meanshift_segmentation(imgLUV,meanshift_imgLUV,1000);
 
     Segmentation::LUVimage2RGBimage(meanshift_imgLUV,imgRGB);   // convert from LUV color space to RGB color space.
 

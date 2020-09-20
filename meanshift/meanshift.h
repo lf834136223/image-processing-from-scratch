@@ -6,12 +6,16 @@
 #define IMAGEPROCESSINGFROMSCRATCH_MEANSHIFT_H
 #include <iostream>
 #include <vector>
+#include <algorithm>
 
 namespace Segmentation{
 
     const double PI  = 3.14159265358979323846264338327950288;
     const int channels = 3;
     const double EQUAL_ERR = 1e-10;
+    struct point2D_UL{
+        unsigned long x,y;
+    };
     class Color{
     private:
         double vals[channels]{};
@@ -153,17 +157,15 @@ namespace Segmentation{
         return (1.0/(sqrt(2*PI)))*exp(exponent);
     }
 
-    void meanshift(const Image & src,Image & dst){
-        const double sr = 6;
-        const double tr = 8;
+    void meanshift_filter(const Image & src,Image & dst, const double sr = 6,const double tr = 8){
         const unsigned long max_itr = 10;
         const double color_threshold = 0.05;
-
         assert(!src.empty());
         for(unsigned long i = 0;i < src.size();i++)
         {
             assert(src[i].size() == src[0].size());
         }
+        assert(sr > 0 && tr > 0);
 
         dst.clear();
 
@@ -224,10 +226,14 @@ namespace Segmentation{
                     cur_col += dc;
                     Color pre_color = cur_color;
 
-                    if(cur_row >= src.size() || cur_col >= src[i].size())
+                    if(cur_row < 0 || cur_row >= src.size() - 1 || cur_col < 0 || cur_col >= src[i].size() - 1)
                     {
                         int cur_r = cur_row;
                         int cur_c = cur_col;
+                        cur_r = cur_r < 0 ? 0 : cur_r;
+                        cur_c = cur_c < 0 ? 0 : cur_c;
+                        cur_r = cur_r >= src.size() ? src.size() - 1 : cur_r;
+                        cur_c = cur_c >= src[i].size() ? src[i].size() - 1 : cur_c;
                         cur_color[0] = src[cur_r][cur_c][0];
                         cur_color[1] = src[cur_r][cur_c][1];
                         cur_color[2] = src[cur_r][cur_c][2];
@@ -260,6 +266,366 @@ namespace Segmentation{
                 }
             }
             dst.push_back(dst_row);
+        }
+    }
+
+    void meanshift_segmentation(const Image & src,Image & dst,const int minarea = 20,const double sr = 6,const double tr = 8){
+        assert(sr > 0 && tr > 0 && minarea >= 0);
+        assert(!src.empty());
+        for(unsigned long i = 0;i < src.size();i++)
+        {
+            assert(src[i].size() == src[0].size());
+        }
+        dst.clear();
+
+        Image filt;
+        meanshift_filter(src,filt,sr,tr);
+
+        Row Colors;
+        std::vector<int> pointnum;
+
+        std::vector<std::vector<int> > Label;
+        Label.reserve(filt.size());
+        std::vector<int> temprow;
+        temprow.reserve(filt[0].size());
+        for(unsigned long i=0;i < filt[0].size();i++){temprow.push_back(0);}
+        for(unsigned long i=0;i < filt.size();i++){Label.push_back(temprow);}
+
+        std::stack<point2D_UL> S;
+        Color curcolor, average;
+        int region = 0;
+        int num = 0;
+
+        int displacement[8][2] = {
+                {-1,-1},{-1,0},{-1,1},
+                {0,-1},        {0,1},
+                {1,-1}, {1,0}, {1,1}
+        };
+        // 8-neighbors
+        double tr_sq = tr * tr;
+
+        ///////////// build Label ///////////////////
+        for(unsigned long i = 0;i < filt.size();i++)
+        {
+            for(unsigned long j = 0;j < filt[i].size();j++)
+            {
+                if(Label[i][j] <= 0)
+                {
+                    region++;
+                    Label[i][j] = region;
+                    S.push({i,j});
+                    curcolor = filt[i][j];
+                    num = 1;
+                    average = curcolor;
+
+                    while(true)
+                    {
+                        if(S.empty()){break;}
+                        point2D_UL curpos = S.top();
+                        S.pop();
+
+                        for(int k = 0;k < 8;k++)
+                        {
+                            unsigned long r = curpos.x + displacement[k][0];
+                            unsigned long c = curpos.y + displacement[k][1];
+                            if(r >= 0 && r < filt.size() && c >= 0 && c < filt[0].size() && Label[r][c] <= 0)
+                            {
+                                Color cl = filt[r][c];
+                                double color_distance_sq = 0;
+                                for(int channel = 0;channel < channels;channel++)
+                                {
+                                    double temp = curcolor[channel] - cl[channel];
+                                    color_distance_sq += (temp*temp);
+                                }
+                                if(color_distance_sq <= tr_sq)
+                                {
+                                    Label[r][c] = region;
+                                    S.push({r,c});
+                                    num++;
+
+                                    for(int channel = 0;channel < channels;channel++)
+                                    {
+                                        average[channel] += cl[channel];
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    Colors.emplace_back(average[0]/num,average[1]/num,average[2]/num);
+                    pointnum.push_back(num);
+                }
+            }
+        }
+
+        /////////////////////// TransitiveClosure ////////////////////////////
+        int max_iter = 5;
+
+        // build adjoint table
+        std::vector<std::vector<int> > adjoint_table;
+        adjoint_table.reserve(region);
+        for(int i = 0;i < region;i++){adjoint_table.emplace_back();}
+        std::vector<int> adjoint_table_head;
+        adjoint_table_head.reserve(region);
+        for(int i = 0;i < region;i++){adjoint_table_head.push_back(i+1);}
+
+        int L1 = 0,L2 = 0;
+        for(unsigned long i = 0;i < Label.size();i++)
+        {
+            for(unsigned long j = 0;j < Label[i].size();j++)
+            {
+                if(i > 0 && Label[i][j] != Label[i-1][j])
+                {
+                    L1 = Label[i][j],L2 = Label[i-1][j];
+                    std::vector<int>::iterator it = std::find(adjoint_table[L1-1].begin(),adjoint_table[L1-1].end(),L2);
+                    if(adjoint_table[L1-1].end()==it)
+                    {
+                        adjoint_table[L1-1].push_back(L2);
+                        adjoint_table[L2-1].push_back(L1);
+                    }
+                }
+                if(j > 0 && Label[i][j] != Label[i][j-1])
+                {
+                    L1 = Label[i][j],L2 = Label[i][j-1];
+                    std::vector<int>::iterator it = std::find(adjoint_table[L1-1].begin(),adjoint_table[L1-1].end(),L2);
+                    if(adjoint_table[L1-1].end()==it)
+                    {
+                        adjoint_table[L1-1].push_back(L2);
+                        adjoint_table[L2-1].push_back(L1);
+                    }
+                }
+            }
+        }
+
+
+        // merge similar areas.
+        for(int i = 0,deltaRegion = 1;i < max_iter && deltaRegion > 0;i++)
+        {
+            for(unsigned long r = 0;r < adjoint_table.size();r++)
+            {
+                for(unsigned long c = 0;c < adjoint_table[r].size();c++)
+                {
+                    double color_distance_sq = 0;
+                    Color color1 = Colors[r], color2 = Colors[adjoint_table[r][c]-1];
+                    for(int channel = 0;channel < channels;channel++)
+                    {
+                        double temp = color1[channel] - color2[channel];
+                        color_distance_sq += (temp*temp);
+                    }
+
+                    if(color_distance_sq <= tr_sq)
+                    {
+                        unsigned long r_root = r + 1, c_root = adjoint_table[r][c];
+                        while(adjoint_table_head[r_root-1]!=r_root)r_root = adjoint_table_head[r_root-1];
+                        while(adjoint_table_head[c_root-1]!=c_root)c_root = adjoint_table_head[c_root-1];
+
+                        if(r_root < c_root)
+                        {adjoint_table_head[c_root-1]=r_root;}
+                        else
+                        {adjoint_table_head[r_root-1]=c_root;}
+                    }
+                }
+            }
+            for(unsigned long ind = 0;ind < adjoint_table_head.size();ind++)
+            {
+                unsigned long ind_root = ind + 1;
+                while(adjoint_table_head[ind_root-1]!=ind_root)ind_root = adjoint_table_head[ind_root-1];
+                adjoint_table_head[ind] = ind_root;
+            }
+
+            Row new_Colors;
+            new_Colors.reserve(region);
+            for(int ind = 0;ind < region;ind++){new_Colors.emplace_back(0,0,0);}
+            std::vector<int> new_pointnum;
+            new_pointnum.reserve(region);
+            for(int ind = 0;ind < region;ind++){new_pointnum.push_back(0);}
+            for(unsigned long ind = 0;ind < adjoint_table_head.size();ind++)
+            {
+                unsigned long ind_ = adjoint_table_head[ind] - 1;
+                new_pointnum[ind_] += pointnum[ind];
+                for(int channel = 0;channel < channels;channel++)
+                {
+                    new_Colors[ind_][channel] += Colors[ind][channel]*pointnum[ind];
+                }
+            }
+
+            std::vector<int> new_adjoint_table_head;
+            new_adjoint_table_head.reserve(region);
+            for(int ind = 0;ind < region;ind++){new_adjoint_table_head.push_back(0);}
+            int label = 0;
+            Colors.clear();
+            pointnum.clear();
+            for(int ind = 0;ind < region;ind++)
+            {
+                unsigned long ind_ = adjoint_table_head[ind] - 1;
+                if(new_adjoint_table_head[ind_] <= 0)
+                {
+                    label++;
+                    new_adjoint_table_head[ind_] = label;
+                    num = new_pointnum[ind_];
+                    Color cl = new_Colors[ind_];
+                    pointnum.push_back(num);
+                    Colors.emplace_back(cl[0]/num,cl[1]/num,cl[2]/num);
+                }
+            }
+            std::vector<std::vector<int> > new_adjoint_table;
+            new_adjoint_table.reserve(label);
+            for(int ind = 0;ind < label;ind++){new_adjoint_table.emplace_back();}
+            for(int ind = 0;ind < region;ind++)
+            {
+                int ind_ = new_adjoint_table_head[adjoint_table_head[ind] - 1] - 1;
+                for(int j = 0;j < adjoint_table[ind].size();j++)
+                {
+                    int new_label = new_adjoint_table_head[adjoint_table_head[adjoint_table[ind][j] - 1] - 1];
+                    if(new_label != ind_ + 1)
+                    {
+                        std::vector<int>::iterator it = std::find(new_adjoint_table[ind_].begin(),new_adjoint_table[ind_].end(),new_label);
+                        if(it == new_adjoint_table[ind_].end())
+                        {
+                            new_adjoint_table[ind_].push_back(new_label);
+                        }
+                    }
+                }
+            }
+
+            deltaRegion = region - label;
+            region = label;
+            adjoint_table = new_adjoint_table;
+            for(unsigned long r = 0; r < Label.size(); r++)
+            {
+                for(unsigned long c = 0; c < Label[r].size(); c++)
+                {
+                    Label[r][c] = new_adjoint_table_head[adjoint_table_head[Label[r][c]-1]-1];
+                }
+            }
+            adjoint_table_head.clear();
+            adjoint_table_head.reserve(region);
+            for(int ind = 0;ind < region;ind++){adjoint_table_head.push_back(ind+1);}
+        }
+
+        // remove small areas.
+        double mindist_sq;
+        for(int deltaRegion = 1;deltaRegion > 0;)
+        {
+            for(unsigned long r = 0;r < adjoint_table.size();r++)
+            {
+                mindist_sq = 1e12;  // Bigger than any possible color distance square.
+                if(pointnum[r] < minarea)
+                {
+                    unsigned long c_root = r + 1;
+                    for(unsigned long c = 0;c < adjoint_table[r].size();c++)
+                    {
+                        double color_distance_sq = 0;
+                        Color color1 = Colors[r], color2 = Colors[adjoint_table[r][c] - 1];
+                        for (int channel = 0; channel < channels; channel++)
+                        {
+                            double temp = color1[channel] - color2[channel];
+                            color_distance_sq += (temp * temp);
+                        }
+                        if(color_distance_sq < mindist_sq)
+                        {
+                            mindist_sq = color_distance_sq;
+                            c_root = adjoint_table[r][c];
+                        }
+                    }
+
+                    unsigned long r_root = r + 1;
+                    while(adjoint_table_head[r_root-1]!=r_root)r_root = adjoint_table_head[r_root-1];
+                    while(adjoint_table_head[c_root-1]!=c_root)c_root = adjoint_table_head[c_root-1];
+
+                    if(r_root < c_root)
+                    {adjoint_table_head[c_root-1]=r_root;}
+                    else
+                    {adjoint_table_head[r_root-1]=c_root;}
+                }
+            }
+            for(unsigned long ind = 0;ind < adjoint_table_head.size();ind++)
+            {
+                unsigned long ind_root = ind + 1;
+                while(adjoint_table_head[ind_root-1]!=ind_root)ind_root = adjoint_table_head[ind_root-1];
+                adjoint_table_head[ind] = ind_root;
+            }
+
+            Row new_Colors;
+            new_Colors.reserve(region);
+            for(int ind = 0;ind < region;ind++){new_Colors.emplace_back(0,0,0);}
+            std::vector<int> new_pointnum;
+            new_pointnum.reserve(region);
+            for(int ind = 0;ind < region;ind++){new_pointnum.push_back(0);}
+            for(unsigned long ind = 0;ind < adjoint_table_head.size();ind++)
+            {
+                unsigned long ind_ = adjoint_table_head[ind] - 1;
+                new_pointnum[ind_] += pointnum[ind];
+                for(int channel = 0;channel < channels;channel++)
+                {
+                    new_Colors[ind_][channel] += Colors[ind][channel]*pointnum[ind];
+                }
+            }
+
+            std::vector<int> new_adjoint_table_head;
+            new_adjoint_table_head.reserve(region);
+            for(int ind = 0;ind < region;ind++){new_adjoint_table_head.push_back(0);}
+            int label = 0;
+            Colors.clear();
+            pointnum.clear();
+            for(int ind = 0;ind < region;ind++)
+            {
+                unsigned long ind_ = adjoint_table_head[ind] - 1;
+                if(new_adjoint_table_head[ind_] <= 0)
+                {
+                    label++;
+                    new_adjoint_table_head[ind_] = label;
+                    num = new_pointnum[ind_];
+                    Color cl = new_Colors[ind_];
+                    pointnum.push_back(num);
+                    Colors.emplace_back(cl[0]/num,cl[1]/num,cl[2]/num);
+                }
+            }
+            std::vector<std::vector<int> > new_adjoint_table;
+            new_adjoint_table.reserve(label);
+            for(int ind = 0;ind < label;ind++){new_adjoint_table.emplace_back();}
+            for(int ind = 0;ind < region;ind++)
+            {
+                int ind_ = new_adjoint_table_head[adjoint_table_head[ind] - 1] - 1;
+                for(int j = 0;j < adjoint_table[ind].size();j++)
+                {
+                    int new_label = new_adjoint_table_head[adjoint_table_head[adjoint_table[ind][j] - 1] - 1];
+                    if(new_label != ind_ + 1)
+                    {
+                        std::vector<int>::iterator it = std::find(new_adjoint_table[ind_].begin(),new_adjoint_table[ind_].end(),new_label);
+                        if(it == new_adjoint_table[ind_].end())
+                        {
+                            new_adjoint_table[ind_].push_back(new_label);
+                        }
+                    }
+                }
+            }
+
+            deltaRegion = region - label;
+            region = label;
+            adjoint_table = new_adjoint_table;
+            for(unsigned long r = 0; r < Label.size(); r++)
+            {
+                for(unsigned long c = 0; c < Label[r].size(); c++)
+                {
+                    Label[r][c] = new_adjoint_table_head[adjoint_table_head[Label[r][c]-1]-1];
+                }
+            }
+            adjoint_table_head.clear();
+            adjoint_table_head.reserve(region);
+            for(int ind = 0;ind < region;ind++){adjoint_table_head.push_back(ind+1);}
+        }
+
+        /////////////// build dst image ///////////////////
+        dst.reserve(Label.size());
+        for(unsigned long i = 0;i < Label.size();i++)
+        {
+            dst.emplace_back();
+            dst[i].reserve(Label[i].size());
+            for(unsigned long j = 0;j < Label[i].size();j++)
+            {
+                dst[i].push_back(Colors[Label[i][j]-1]);
+            }
         }
     }
 
