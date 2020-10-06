@@ -31,9 +31,37 @@ Just make sure you have the images in the right path, and you might wanna modify
 ## Contents
 * canny edge detection  
 It is an algorithm that extracts edges of an image.  
-![](https://github.com/o0o0o0o0o0o0o/image-processing-from-scratch/tree/master/results/canny%20edge%20detection/lena.png?raw=true)![](https://github.com/o0o0o0o0o0o0o/image-processing-from-scratch/tree/master/results/canny%20edge%20detection/lena.jpg?raw=true)  
+
 * hough transform  
 It is an algorithm that can theoratically detects shapes that you can write formulas for it.  
-![](https://github.com/o0o0o0o0o0o0o/image-processing-from-scratch/tree/master/results/hough%20transform/Line/02.jpeg?raw=true)![](https://github.com/o0o0o0o0o0o0o/image-processing-from-scratch/tree/master/results/hough%20transform/Line/2.jpg?raw=true)  
-![](https://github.com/o0o0o0o0o0o0o/image-processing-from-scratch/tree/master/results/hough%20transform/Circle/2.jpeg?raw=true)![](https://github.com/o0o0o0o0o0o0o/image-processing-from-scratch/tree/master/results/hough%20transform/Circle/twitter.jpg?raw=true)  
+
+* harris corner detection  
+This algorithm detects corners.  
+
+* fast fourier transform  
+2-D fourier transform for images using fft.  
+
+* sift  
+Scale-invariant feature transform, a well-known technique to extract feature points for image matching.  
+
+* KNN  
+Using balanced K-D tree to find k nearest neighbors of K-dimension points.  
+
+* PCA&SVD  
+Do PCA and SVD using jacobi rotation.(which is accurate but slow)  
+
+* Ransac  
+Stitch different images together after knowing the sift keypoint pairs.  
+
+* watershed  
+watershed segmentation algorithm.  
+
+* meanshift  
+meanshift segmentation algorithm.  
+
+* generalized hough transform  
+template match of images, detects a given template in an query image. The vote space is implemented with a sparse vector to support big images.  
+
+* a lot to be continued...
+
 
