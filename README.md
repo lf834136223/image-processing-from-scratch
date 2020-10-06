@@ -5,12 +5,15 @@ This repository contains many interesting image processing algorithms that are w
 
 ### All codes were wrote in python3.7 or c++
 
+---
 moudles you may need:
-    python:
-        - numpy for matix calculation
-        - matplotlib for reading and showing images
-        - opencv2 for some image operations
-    c++:
-        - opencv2
+<strong>python:</strong>
+-        numpy for matix calculation
+-        matplotlib for reading and showing images
+-       opencv2 for some image operations
+<strong>c++:</strong>
+-        opencv2
+
+---
 
 Have fun.
