@@ -29,5 +29,11 @@ Just make sure you have the images in the right path, and you might wanna modify
 <strong>Have fun!</strong>  
 
 ## Contents
-[introduction & basics](./introduction & basics)
+* canny edge detection  
+It is an algorithm that extracts edges of an image.  
+![](./results/canny edge detection/lena.png)![](./results/canny edge detection/lena.jpg)  
+* hough transform
+It is an algorithm that can theoratically detects shapes that you can write formulas for it.  
+![](./results/hough transform/Line/02.jpeg)![](./results/hough transform/Line/2.jpg)  
+![](./results/hough transform/Circle/2.jpeg)![](./results/hough transform/Circle/twitter.jpg)  
 
