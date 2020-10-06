@@ -16,27 +16,15 @@ _c++:_
 
 <strong>Usage</strong>  
 you can always run a python script just by  
-
----
-`python script.py`  
-
----
+    `python script.py`  
 
 for c++, you need to compile first  
-
----
-`cd build`  
-`cmake ..`  
-`make`  
-
----
+    `cd build`  
+    `cmake ..`  
+    `make`  
 
 when it's done, you are ready to run the executable file by  
-
----
-`./Main`  
-
----
+    `./Main`  
 Just make sure you have the images in the right path, and you might wanna modify the code a bit to process another image.  
 <strong>Have fun!</strong>  
 
