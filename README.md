@@ -31,9 +31,9 @@ Just make sure you have the images in the right path, and you might wanna modify
 ## Contents
 * canny edge detection  
 It is an algorithm that extracts edges of an image.  
-![](./results/canny edge detection/lena.png)![](./results/canny edge detection/lena.jpg)  
-* hough transform
+![](https://github.com/o0o0o0o0o0o0o/image-processing-from-scratch/tree/master/results/canny edge detection/lena.png)![](https://github.com/o0o0o0o0o0o0o/image-processing-from-scratch/tree/master/results/canny edge detection/lena.jpg)  
+* hough transform  
 It is an algorithm that can theoratically detects shapes that you can write formulas for it.  
-![](./results/hough transform/Line/02.jpeg)![](./results/hough transform/Line/2.jpg)  
-![](./results/hough transform/Circle/2.jpeg)![](./results/hough transform/Circle/twitter.jpg)  
+![](https://github.com/o0o0o0o0o0o0o/image-processing-from-scratch/tree/master/results/hough transform/Line/02.jpeg)![](https://github.com/o0o0o0o0o0o0o/image-processing-from-scratch/tree/master/results/hough transform/Line/2.jpg)  
+![](https://github.com/o0o0o0o0o0o0o/image-processing-from-scratch/tree/master/results/hough transform/Circle/2.jpeg)![](https://github.com/o0o0o0o0o0o0o/image-processing-from-scratch/tree/master/results/hough transform/Circle/twitter.jpg)  
 
