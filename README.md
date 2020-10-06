@@ -28,5 +28,6 @@ when it's done, you are ready to run the executable file by
 Just make sure you have the images in the right path, and you might wanna modify the code a bit to process another image.  
 <strong>Have fun!</strong>  
 
-##Contents
+## Contents
+[introduction & basics](./introduction & basics)
 
