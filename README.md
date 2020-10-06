@@ -6,11 +6,12 @@ This repository contains many interesting image processing algorithms that are w
 <strong>Implementation</strong>  
 All codes were wrote in python3.7 or c++  
 moudles you may need:  
-python: 
+_python:_ 
 - numpy for matix calculation  
 - matplotlib for reading and showing images  
 - opencv2 for some image operations  
-c++:  
+
+_c++:_  
 - opencv2  
 
 <strong>Usage</strong>  
@@ -20,7 +21,7 @@ for c++, you need to compile first
 `cd build`  
 `cmake ..`  
 `make`  
-when it's done, you are ready to run the execuatable by  
+when it's done, you are ready to run the executable file by  
 `./Main`  
 Just make sure you have the images in the right path, and you might wanna modify the code a bit to process another image.  
 <strong>Have fun!</strong>  
