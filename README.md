@@ -1,6 +1,7 @@
 # image processing from scratch
 
 ## what is this?
+图像处理算法
 This repository contains many interesting image processing algorithms that are written from scratch. Read these codes will allow you to have a comprehensive understanding of the principles of these algorithms. I also have video tutorials for these algorithms [here](https://space.bilibili.com/14672002). Go check out if you know Chinese :-)  
 
 <strong>Implementation</strong>  
